@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
+const designRoutes = require('./routes/designs'); // 👈 import designs router
 require('dotenv').config();
 
 const app = express();
@@ -15,9 +16,7 @@ const allowedOrigins = [
 
 app.use(cors({
     origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin) return callback(null, true);
-
         if (allowedOrigins.indexOf(origin) === -1) {
             const message = 'The CORS policy for this site does not allow access from the specified Origin.';
             return callback(new Error(message), false);
@@ -27,7 +26,6 @@ app.use(cors({
     credentials: true
 }));
 
-// Middleware to parse JSON requests
 app.use(express.json());
 
 // Basic route
@@ -35,8 +33,9 @@ app.get('/', (req, res) => {
     res.send('Hello from Express!');
 });
 
-// Mount auth routes - make sure this line is present
+// Mount routes
 app.use('/api/auth', authRoutes);
+app.use('/api/designs', designRoutes); // 👈 mount designs router here
 
 // Start the server
 const PORT = process.env.PORT || 3001;
