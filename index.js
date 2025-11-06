@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const designRoutes = require('./routes/designs'); // 👈 import designs router
+const userRoutes = require('./routes/users');
 require('dotenv').config();
 
 const app = express();
@@ -36,6 +37,7 @@ app.get('/', (req, res) => {
 // Mount routes
 app.use('/api/auth', authRoutes);
 app.use('/api/designs', designRoutes); // 👈 mount designs router here
+app.use('/api/users', userRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 3001;
