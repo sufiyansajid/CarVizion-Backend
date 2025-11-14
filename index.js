@@ -3,6 +3,9 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const designRoutes = require('./routes/designs'); // 👈 import designs router
 const userRoutes = require('./routes/users');
+const uploadRoutes = require('./routes/uploads');
+const aiRoutes = require('./routes/ai');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -27,7 +30,12 @@ app.use(cors({
     credentials: true
 }));
 
-app.use(express.json());
+// Increase body size limits to handle larger design payloads (e.g., thumbnails as data URLs)
+app.use(express.json({ limit: '20mb' }));
+app.use(express.urlencoded({ extended: true, limit: '20mb' }));
+
+// Serve uploads folder statically
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Basic route
 app.get('/', (req, res) => {
@@ -38,6 +46,8 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/designs', designRoutes); // 👈 mount designs router here
 app.use('/api/users', userRoutes);
+app.use('/api/uploads', uploadRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 3001;

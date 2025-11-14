@@ -37,7 +37,7 @@ const designController = {
 
     updateDesign: async (req, res) => {
         try {
-            const { designId } = req.params;
+            const { id: designId } = req.params;
             const { name, description, model_data, color_data, parts_data, thumbnail_url } = req.body;
             const userId = req.user.id;
 
@@ -106,7 +106,7 @@ const designController = {
 
     deleteDesign: async (req, res) => {
         try {
-            const { designId } = req.params;
+            const { id: designId } = req.params;
             const userId = req.user.id;
 
             const [result] = await db.execute(
@@ -128,7 +128,7 @@ const designController = {
     // Optional: Get single design by ID
     getDesignById: async (req, res) => {
         try {
-            const { designId } = req.params;
+            const { id: designId } = req.params;
             const userId = req.user.id;
 
             const [rows] = await db.execute(
@@ -160,7 +160,7 @@ const designController = {
     // Optional: Upload thumbnail endpoint
     uploadThumbnail: async (req, res) => {
         try {
-            const { designId } = req.params;
+            const { id: designId } = req.params;
             const userId = req.user.id;
 
             // This would handle file upload - you'll need multer or similar

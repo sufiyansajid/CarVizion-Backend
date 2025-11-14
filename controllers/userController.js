@@ -1,5 +1,7 @@
 const bcrypt = require('bcrypt');
 const db = require('../config/database');
+const fs = require('fs');
+const path = require('path');
 
 const userController = {
     getProfile: async (req, res) => {
@@ -99,15 +101,76 @@ const userController = {
 
     updateAvatar: async (req, res) => {
         try {
-            const { avatarUrl } = req.body;
+            // Debug logging
+            console.log('Update avatar request received');
+            console.log('req.body:', req.body);
+            console.log('req.headers:', req.headers);
+            console.log('Content-Type:', req.headers['content-type']);
 
+            // Check if file was uploaded (multer) or if it's a base64/dataUrl
+            let avatarUrl = null;
+
+            // Ensure req.body exists - if not, initialize as empty object
+            const body = req.body || {};
+
+            if (req.file) {
+                // File uploaded via multer (multipart/form-data)
+                avatarUrl = `/uploads/avatars/${req.file.filename}`;
+            } else if (body.avatarUrl) {
+                // Direct URL provided
+                avatarUrl = body.avatarUrl;
+            } else if (body.dataUrl) {
+                // Base64 data URL provided
+                const { dataUrl } = body;
+                if (!dataUrl || typeof dataUrl !== 'string' || !dataUrl.startsWith('data:')) {
+                    return res.status(400).json({ message: 'Invalid dataUrl' });
+                }
+
+                // Parse data URL
+                const match = dataUrl.match(/^data:(.+);base64,(.*)$/);
+                if (!match) {
+                    return res.status(400).json({ message: 'Malformed dataUrl' });
+                }
+                const mimeType = match[1];
+                const base64Data = match[2];
+
+                // Ensure uploads directory exists
+                const uploadDir = path.join(__dirname, '..', 'uploads', 'avatars');
+                if (!fs.existsSync(uploadDir)) {
+                    fs.mkdirSync(uploadDir, { recursive: true });
+                }
+
+                const extension = mimeType.split('/')[1] || 'png';
+                const fileName = `avatar_${req.user.id}_${Date.now()}.${extension}`;
+                const filePath = path.join(uploadDir, fileName);
+
+                fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
+                avatarUrl = `/uploads/avatars/${fileName}`;
+            } else {
+                return res.status(400).json({ message: 'No avatar file or data provided' });
+            }
+
+            // Update database
             await db.execute(
                 'UPDATE users SET avatar_url = ? WHERE id = ?',
                 [avatarUrl, req.user.id]
             );
 
+            // Get updated user
+            const [user] = await db.execute(
+                'SELECT id, first_name, last_name, email, avatar_url FROM users WHERE id = ?',
+                [req.user.id]
+            );
+
             res.json({
                 message: 'Avatar updated successfully',
+                user: {
+                    id: user[0].id,
+                    firstName: user[0].first_name,
+                    lastName: user[0].last_name,
+                    email: user[0].email,
+                    avatarUrl: user[0].avatar_url
+                },
                 avatarUrl
             });
         } catch (error) {
