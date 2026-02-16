@@ -3,8 +3,9 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const designRoutes = require('./routes/designs'); // 👈 import designs router
 const userRoutes = require('./routes/users');
+const carRoutes = require('./routes/cars');
 const uploadRoutes = require('./routes/uploads');
-const aiRoutes = require('./routes/ai');
+const feedbackRoutes = require('./routes/feedback');
 const path = require('path');
 require('dotenv').config();
 
@@ -46,8 +47,9 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/designs', designRoutes); // 👈 mount designs router here
 app.use('/api/users', userRoutes);
+app.use('/api/cars', carRoutes);
 app.use('/api/uploads', uploadRoutes);
-app.use('/api/ai', aiRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 3001;

@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS cars (
+    id VARCHAR(50) PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    path VARCHAR(255) NOT NULL,
+    type ENUM('sedan', 'sport', 'suv') NOT NULL,
+    description TEXT,
+    thumbnail VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
