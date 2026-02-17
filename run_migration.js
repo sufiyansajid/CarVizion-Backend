@@ -5,7 +5,9 @@ const path = require('path');
 
 const runMigration = async () => {
     try {
-        const sqlPath = path.join(__dirname, 'config', 'feedback_table.sql');
+        const migrationFile = process.argv[2] || 'migrations/010_users_add_reset_token.sql';
+        const sqlPath = path.join(__dirname, migrationFile);
+        console.log(`Reading migration from: ${sqlPath}`);
         const sql = fs.readFileSync(sqlPath, 'utf8');
 
         console.log('Running migration...');
