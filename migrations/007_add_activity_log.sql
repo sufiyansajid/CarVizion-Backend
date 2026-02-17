@@ -1,0 +1,1 @@
+ALTER TABLE car_designs ADD COLUMN activity_log JSON DEFAULT NULL;

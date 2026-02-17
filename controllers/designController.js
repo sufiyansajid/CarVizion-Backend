@@ -3,11 +3,11 @@ const db = require('../config/database');
 const designController = {
     createDesign: async (req, res) => {
         try {
-            const { name, description, model_data, color_data, parts_data, thumbnail_url } = req.body;
+            const { name, description, model_data, color_data, parts_data, thumbnail_url, activity_log } = req.body;
             const userId = req.user.id;
 
             const [result] = await db.execute(
-                'INSERT INTO car_designs (user_id, name, description, model_data, color_data, parts_data, thumbnail_url) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                'INSERT INTO car_designs (user_id, name, description, model_data, color_data, parts_data, thumbnail_url, activity_log) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
                 [
                     userId,
                     name,
@@ -15,7 +15,8 @@ const designController = {
                     JSON.stringify(model_data || {}),
                     JSON.stringify(color_data || {}),
                     JSON.stringify(parts_data || {}),
-                    thumbnail_url || null
+                    thumbnail_url || null,
+                    JSON.stringify(activity_log || [])
                 ]
             );
 
@@ -38,12 +39,12 @@ const designController = {
     updateDesign: async (req, res) => {
         try {
             const { id: designId } = req.params;
-            const { name, description, model_data, color_data, parts_data, thumbnail_url } = req.body;
+            const { name, description, model_data, color_data, parts_data, thumbnail_url, activity_log } = req.body;
             const userId = req.user.id;
 
             const [result] = await db.execute(
                 `UPDATE car_designs 
-                 SET name = ?, description = ?, model_data = ?, color_data = ?, parts_data = ?, thumbnail_url = ?
+                 SET name = ?, description = ?, model_data = ?, color_data = ?, parts_data = ?, thumbnail_url = ?, activity_log = ?
                  WHERE id = ? AND user_id = ?`,
                 [
                     name,
@@ -52,6 +53,7 @@ const designController = {
                     JSON.stringify(color_data || {}),
                     JSON.stringify(parts_data || {}),
                     thumbnail_url || null,
+                    JSON.stringify(activity_log || []),
                     designId,
                     userId
                 ]
@@ -82,7 +84,7 @@ const designController = {
             const userId = req.user.id;
 
             const [rows] = await db.execute(
-                'SELECT id, name, description, thumbnail_url, model_data, color_data, parts_data, created_at, updated_at FROM car_designs WHERE user_id = ? ORDER BY created_at DESC',
+                'SELECT id, name, description, thumbnail_url, model_data, color_data, parts_data, activity_log, created_at, updated_at FROM car_designs WHERE user_id = ? ORDER BY created_at DESC',
                 [userId]
             );
 
@@ -91,7 +93,8 @@ const designController = {
                 ...design,
                 model_data: design.model_data ? JSON.parse(design.model_data) : {},
                 color_data: design.color_data ? JSON.parse(design.color_data) : {},
-                parts_data: design.parts_data ? JSON.parse(design.parts_data) : {}
+                parts_data: design.parts_data ? JSON.parse(design.parts_data) : {},
+                activity_log: design.activity_log ? JSON.parse(design.activity_log) : []
             }));
 
             res.status(200).json({
@@ -144,7 +147,8 @@ const designController = {
                 ...rows[0],
                 model_data: rows[0].model_data ? JSON.parse(rows[0].model_data) : {},
                 color_data: rows[0].color_data ? JSON.parse(rows[0].color_data) : {},
-                parts_data: rows[0].parts_data ? JSON.parse(rows[0].parts_data) : {}
+                parts_data: rows[0].parts_data ? JSON.parse(rows[0].parts_data) : {},
+                activity_log: rows[0].activity_log ? JSON.parse(rows[0].activity_log) : []
             };
 
             res.status(200).json({
